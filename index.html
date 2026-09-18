@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BlueGaru</title>
+<style>
+:root{
+  --bg:#0f172a;
+  --panel:#111827;
+  --panel2:#1f2937;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --accent:#38bdf8;
+  --ok:#22c55e;
+  --bad:#ef4444;
+  --warn:#f59e0b;
+  --border:#334155;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:linear-gradient(180deg,#0f172a,#111827);
+  color:var(--text);
+  min-height:100vh;
+}
+.container{max-width:760px;margin:auto;padding:18px}
+h1{font-size:1.7rem;margin:0 0 6px}
+h2{font-size:1.25rem}
+small,.muted{color:var(--muted)}
+.card{
+  background:rgba(17,24,39,.94);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  margin:14px 0;
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+button{
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+  padding:13px 14px;
+  border-radius:12px;
+  font-size:1rem;
+  cursor:pointer;
+}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#082f49;border:none;font-weight:700}
+button.good{background:#14532d;border-color:#166534}
+button.bad{background:#7f1d1d;border-color:#991b1b}
+.option{
+  width:100%;
+  text-align:left;
+  margin:7px 0;
+}
+input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#0b1220;
+  color:var(--text);
+  font-size:1.15rem;
+}
+.big{
+  font-size:2.2rem;
+  font-weight:800;
+  text-align:center;
+  padding:20px 4px;
+}
+.stats{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:.95rem
+}
+.pill{
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:7px 10px;
+}
+.feedback{
+  margin-top:14px;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  line-height:1.5;
+}
+.ok{border-color:#166534;background:#052e16}
+.no{border-color:#991b1b;background:#450a0a}
+.note{
+  margin-top:10px;
+  padding:12px;
+  border-left:4px solid var(--warn);
+  background:#292012;
+  border-radius:8px;
+}
+.hidden{display:none}
+.topnav{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.topnav button{padding:9px 11px;font-size:.9rem}
+.progressbar{
+  height:10px;
+  background:#0b1220;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  margin:10px 0;
+}
+.progressbar > div{
+  height:100%;
+  background:var(--accent);
+  width:0%;
+}
+.center{text-align:center}
+hr{border:0;border-top:1px solid var(--border);margin:18px 0}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>BlueGaru</h1>
+  <div class="muted">Entrenamiento de cálculo, álgebra y Álgebra Lineal.</div>
+
+  <div class="topnav">
+    <button onclick="show('home')">Inicio</button>
+    <button onclick="show('mental')">Cálculo mental</button>
+    <button onclick="show('quiz')">Rectas</button>
+    <button onclick="show('flash')">Flashcards</button>
+    <button onclick="show('progress')">Progreso</button>
+  </div>
+
+  <section id="home" class="screen">
+    <div class="card">
+      <h2>¿Qué quieres practicar?</h2>
+      <div class="grid">
+        <button onclick="show('mental')">🧠 Cálculo mental</button>
+        <button onclick="show('quiz')">📐 Rectas y pendientes</button>
+        <button onclick="show('flash')">🃏 Flashcards</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Sesión acumulada</h2>
+      <div class="stats">
+        <span class="pill">Ejercicios: <b id="homeTotal">0</b></span>
+        <span class="pill">Correctos: <b id="homeCorrect">0</b></span>
+        <span class="pill">Precisión: <b id="homeAccuracy">0%</b></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="mental" class="screen hidden">
+    <div class="card">
+      <h2>🧠 Cálculo mental</h2>
+      <div class="grid">
+        <button onclick="setMentalLevel(1)">Nivel 1 · Sumas</button>
+        <button onclick="setMentalLevel(2)">Nivel 2 · Sumas y restas</button>
+        <button onclick="setMentalLevel(3)">Nivel 3 · Multiplicaciones</button>
+      </div>
+      <div class="big" id="mentalQuestion">8 + 7 = ?</div>
+      <input id="mentalAnswer" inputmode="numeric" placeholder="Escribe tu respuesta y pulsa Enter" />
+      <div id="mentalFeedback"></div>
+      <div class="stats" style="margin-top:14px">
+        <span class="pill">Nivel: <b id="mentalLevel">1</b></span>
+        <span class="pill">Hechos: <b id="mentalDone">0</b></span>
+        <span class="pill">Aciertos: <b id="mentalCorrect">0</b></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="quiz" class="screen hidden">
+    <div class="card">
+      <h2>📐 Rectas y pendientes</h2>
+      <div class="muted">Las preguntas y las opciones cambian de orden.</div>
+      <div class="progressbar"><div id="quizBar"></div></div>
+      <div class="big" style="font-size:1.45rem;text-align:left" id="quizQuestion"></div>
+      <div id="quizOptions"></div>
+      <div id="quizFeedback"></div>
+      <button id="nextQuizBtn" class="primary hidden" onclick="nextQuiz()" style="margin-top:14px">Siguiente →</button>
+    </div>
+  </section>
+
+  <section id="flash" class="screen hidden">
+    <div class="card">
+      <h2>🃏 Flashcards</h2>
+      <div class="muted">Primero intenta responder sin mirar.</div>
+      <div class="big" style="font-size:1.45rem" id="flashQuestion"></div>
+      <button class="primary" id="showAnswerBtn" onclick="revealFlash()">Mostrar respuesta</button>
+      <div id="flashAnswer" class="feedback hidden"></div>
+      <div id="flashRating" class="grid hidden" style="margin-top:12px">
+        <button class="bad" onclick="rateFlash(0)">❌ No la sabía</button>
+        <button onclick="rateFlash(1)">🤔 Más o menos</button>
+        <button class="good" onclick="rateFlash(2)">✅ La sabía</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="progress" class="screen hidden">
+    <div class="card">
+      <h2>📊 Progreso</h2>
+      <div id="progressText"></div>
+      <hr>
+      <button onclick="resetProgress()">Reiniciar progreso</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const state = JSON.parse(localStorage.getItem('linealTrainerState') || '{"total":0,"correct":0,"mentalDone":0,"mentalCorrect":0,"quizDone":0,"quizCorrect":0,"flashSeen":0}');
+function save(){ localStorage.setItem('linealTrainerState', JSON.stringify(state)); updateStats(); }
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if(id==='progress') renderProgress();
+}
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+}
+
+let mentalLevel=1, mentalResult=0;
+function setMentalLevel(n){ mentalLevel=n; document.getElementById('mentalLevel').textContent=n; newMental(); }
+function newMental(){
+  let a,b,op;
+  if(mentalLevel===1){a=Math.floor(Math.random()*11);b=Math.floor(Math.random()*11);op='+';mentalResult=a+b;}
+  if(mentalLevel===2){
+    a=Math.floor(Math.random()*21);b=Math.floor(Math.random()*21);op=Math.random()<.5?'+':'-';
+    if(op==='-' && b>a){[a,b]=[b,a]}
+    mentalResult=op==='+'?a+b:a-b;
+  }
+  if(mentalLevel===3){a=Math.floor(Math.random()*9)+2;b=Math.floor(Math.random()*9)+2;op='×';mentalResult=a*b;}
+  document.getElementById('mentalQuestion').textContent=`${a} ${op} ${b} = ?`;
+  document.getElementById('mentalAnswer').value='';
+  document.getElementById('mentalFeedback').innerHTML='';
+  document.getElementById('mentalAnswer').focus();
+}
+document.getElementById('mentalAnswer').addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  const v=Number(e.target.value);
+  if(!Number.isFinite(v)) return;
+  const ok=v===mentalResult;
+  state.total++; state.mentalDone++;
+  if(ok){state.correct++;state.mentalCorrect++;}
+  document.getElementById('mentalFeedback').innerHTML = ok
+    ? `<div class="feedback ok">✅ Correcto</div>`
+    : `<div class="feedback no">❌ Era <b>${mentalResult}</b></div>`;
+  save();
+  setTimeout(newMental,650);
+});
+
+const quiz = [
+ {q:"¿Qué representa m en la ecuación y = mx + b?",o:["La pendiente","La intersección con el eje x","La intersección con el eje y","La longitud de la recta"],a:"La pendiente",n:"Recuerda: m indica cuánto cambia y por cada unidad que cambia x."},
+ {q:"¿Qué representa b en y = mx + b?",o:["La pendiente","El punto donde la recta corta el eje y","El punto donde corta el eje x","El ángulo de 90°"],a:"El punto donde la recta corta el eje y",n:"Cuando x = 0, queda y = b. Por eso el punto es (0,b)."},
+ {q:"Si una recta tiene pendiente positiva, ¿qué hace al avanzar hacia la derecha?",o:["Sube","Baja","Permanece horizontal","Se vuelve vertical"],a:"Sube",n:"m > 0 significa que al aumentar x también aumenta y."},
+ {q:"Si m = 0, la recta es...",o:["Horizontal","Vertical","Perpendicular al eje x","Indefinida"],a:"Horizontal",n:"Una recta horizontal no cambia en y, así que Δy = 0 y m = 0."},
+ {q:"¿Por qué una recta vertical tiene pendiente indefinida?",o:["Porque Δx = 0","Porque Δy = 0","Porque m = 1","Porque b = 0"],a:"Porque Δx = 0",n:"La pendiente es m = Δy/Δx. En una vertical, Δx = 0, y dividir entre cero no está definido."},
+ {q:"¿Qué relación tienen las pendientes de dos rectas paralelas distintas?",o:["m₁ = m₂","m₁ = -m₂","m₁m₂ = 1","m₁ = 0 siempre"],a:"m₁ = m₂",n:"Las rectas paralelas tienen la misma inclinación, por eso sus pendientes son iguales."},
+ {q:"Si una recta tiene pendiente 2, ¿cuál es la pendiente de una perpendicular?",o:["-1/2","1/2","-2","2"],a:"-1/2",n:"Para pendientes definidas, una perpendicular cumple m₂ = -1/m₁."},
+ {q:"En la forma ax + by = c, con b ≠ 0, ¿cuál es la pendiente?",o:["-a/b","a/b","-b/a","c/b"],a:"-a/b",n:"Al despejar: by = -ax + c, entonces y = (-a/b)x + c/b."},
+ {q:"Con los puntos (1,2) y (3,6), ¿cuál es la pendiente?",o:["2","4","1/2","-2"],a:"2",n:"m = (6-2)/(3-1) = 4/2 = 2."},
+ {q:"Resolver un sistema de dos ecuaciones lineales en dos variables significa geométricamente...",o:["Encontrar el punto donde se intersectan las rectas","Calcular solo sus pendientes","Hacer que ambas sean horizontales","Encontrar siempre el origen"],a:"Encontrar el punto donde se intersectan las rectas",n:"Una solución (x,y) debe satisfacer ambas ecuaciones al mismo tiempo; geométricamente pertenece a las dos rectas."}
+];
+let currentQuiz=null, quizAnswered=false;
+function nextQuiz(){
+  currentQuiz=quiz[Math.floor(Math.random()*quiz.length)];
+  quizAnswered=false;
+  document.getElementById('quizQuestion').textContent=currentQuiz.q;
+  const options=shuffle(currentQuiz.o);
+  document.getElementById('quizOptions').innerHTML=options.map(o=>`<button class="option" onclick='answerQuiz(${JSON.stringify(o)})'>${o}</button>`).join('');
+  document.getElementById('quizFeedback').innerHTML='';
+  document.getElementById('nextQuizBtn').classList.add('hidden');
+}
+function answerQuiz(ans){
+  if(quizAnswered) return;
+  quizAnswered=true;
+  const ok=ans===currentQuiz.a;
+  state.total++;state.quizDone++;
+  if(ok){state.correct++;state.quizCorrect++;}
+  document.getElementById('quizFeedback').innerHTML=`
+    <div class="feedback ${ok?'ok':'no'}">
+      ${ok?'✅ <b>Correcto</b>':`❌ <b>Incorrecto.</b><br>La respuesta correcta es: <b>${currentQuiz.a}</b>`}
+      <div class="note">💡 <b>Recuerda:</b> ${currentQuiz.n}</div>
+    </div>`;
+  document.getElementById('nextQuizBtn').classList.remove('hidden');
+  save();
+}
+
+const flashcards=[
+ {q:"¿Qué es la pendiente de una recta?",a:"Es la razón de cambio vertical respecto al cambio horizontal: m = Δy/Δx."},
+ {q:"¿Qué significa que dos rectas sean paralelas?",a:"Que tienen la misma dirección y, si son distintas, no se intersectan. Con pendientes definidas: m₁ = m₂."},
+ {q:"¿Qué significa que dos rectas sean perpendiculares?",a:"Que se intersectan formando un ángulo de 90°. Si sus pendientes están definidas: m₂ = -1/m₁."},
+ {q:"¿Qué indica el signo de la pendiente?",a:"m > 0: la recta sube; m < 0: baja; m = 0: es horizontal."},
+ {q:"¿Por qué la pendiente de una recta vertical es indefinida?",a:"Porque Δx = 0 y la fórmula m = Δy/Δx implicaría dividir entre cero."},
+ {q:"¿Qué significa resolver un sistema de dos rectas?",a:"Encontrar un par (x,y) que satisfaga ambas ecuaciones; geométricamente, hallar su punto de intersección."}
+];
+let currentFlash=null;
+function newFlash(){
+  currentFlash=flashcards[Math.floor(Math.random()*flashcards.length)];
+  document.getElementById('flashQuestion').textContent=currentFlash.q;
+  document.getElementById('flashAnswer').textContent=currentFlash.a;
+  document.getElementById('flashAnswer').classList.add('hidden');
+  document.getElementById('flashRating').classList.add('hidden');
+  document.getElementById('showAnswerBtn').classList.remove('hidden');
+}
+function revealFlash(){
+  document.getElementById('flashAnswer').classList.remove('hidden');
+  document.getElementById('flashRating').classList.remove('hidden');
+  document.getElementById('showAnswerBtn').classList.add('hidden');
+}
+function rateFlash(r){
+  state.flashSeen++;
+  save();
+  newFlash();
+}
+function updateStats(){
+  const acc=state.total?Math.round(state.correct/state.total*100):0;
+  document.getElementById('homeTotal').textContent=state.total;
+  document.getElementById('homeCorrect').textContent=state.correct;
+  document.getElementById('homeAccuracy').textContent=acc+'%';
+  document.getElementById('mentalDone').textContent=state.mentalDone;
+  document.getElementById('mentalCorrect').textContent=state.mentalCorrect;
+  const qacc=state.quizDone?Math.round(state.quizCorrect/state.quizDone*100):0;
+  document.getElementById('quizBar').style.width=qacc+'%';
+}
+function renderProgress(){
+  const acc=state.total?Math.round(state.correct/state.total*100):0;
+  const macc=state.mentalDone?Math.round(state.mentalCorrect/state.mentalDone*100):0;
+  const qacc=state.quizDone?Math.round(state.quizCorrect/state.quizDone*100):0;
+  document.getElementById('progressText').innerHTML=`
+    <p><b>Total:</b> ${state.total} ejercicios · ${acc}% de precisión</p>
+    <p><b>Cálculo mental:</b> ${state.mentalDone} ejercicios · ${macc}% de precisión</p>
+    <p><b>Rectas:</b> ${state.quizDone} preguntas · ${qacc}% de precisión</p>
+    <p><b>Flashcards vistas:</b> ${state.flashSeen}</p>
+    <div class="note">El progreso se guarda en este navegador. Por ahora, PC y teléfono tendrán progreso separado aunque usen el mismo enlace.</div>`;
+}
+function resetProgress(){
+  if(confirm('¿Seguro que quieres borrar todo el progreso de este navegador?')){
+    localStorage.removeItem('linealTrainerState'); location.reload();
+  }
+}
+updateStats();newMental();nextQuiz();newFlash();
+</script>
+</body>
+</html>
